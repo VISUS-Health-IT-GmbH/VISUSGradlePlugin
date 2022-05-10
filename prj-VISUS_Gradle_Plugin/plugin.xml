@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.ui.handlers">
+      <handler class="com.visus.eclipse.plugin.GenerateJarAction"
+               commandId="com.visus.menu.action.GenerateJarAction">
+         <activeWhen>
+            <with variable="selection">
+               <count value="1" />
+               <iterate ifEmpty="false" operator="and">
+                  <or>
+                     <adapt type="org.eclipse.core.resources.IProject" />
+                     <adapt type="org.eclipse.jdt.core.IJavaProject" />
+                  </or>
+               </iterate>
+            </with>
+         </activeWhen>
+      </handler>
+   </extension>
+
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu">
+         <menu icon="src/com/visus/eclipse/plugin/resources/logo.png"
+               id="com.visus.gradle.menus"
+               label="VISUS"
+               mnemonic="V" />
+      </menuContribution>
+      <menuContribution allPopups="false" locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+         <menu icon="src/com/visus/eclipse/plugin/resources/logo.png"
+               id="com.visus.gradle.menus"
+               label="VISUS"
+               mnemonic="V">
+            <command commandId="com.visus.menu.action.GenerateJarAction"
+					 label="Generate JAR using Gradle"
+					 style="push" />
+         </menu>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.commands">
+      <category id="com.visus.gradle.commands.visus" name="VISUS" />
+      <command categoryId="com.visus.gradle.commands.visus"
+               id="com.visus.menu.action.GenerateJarAction"
+               name="Generate JAR using Gradle">
+      </command>
+   </extension>
+</plugin>

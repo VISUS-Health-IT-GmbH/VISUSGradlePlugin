@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Gradle Integration Plugin
+Bundle-SymbolicName: com.visus.eclipse.plugin;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: VISUS Health IT GmbH
+Automatic-Module-Name: com.visus.eclipse.gradle
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.core;bundle-version="3.9.2",
+ org.eclipse.jdt.ui;bundle-version="3.9.2",
+ org.eclipse.core.resources;bundle-version="3.8.101",
+ org.eclipse.ui.console;bundle-version="3.6.201"
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.visus.eclipse.plugin.Activator

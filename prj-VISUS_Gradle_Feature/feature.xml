@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.visus.eclipse.feature"
+      label="Gradle Integration Plugin"
+      version="1.0.0"
+      provider-name="VISUS Health IT GmbH"
+      plugin="com.visus.eclipse.plugin">
+
+   <description url="https://github.com/VISUS-Health-IT-GmbH/VISUSGradlePlugin">
+      Eclipse Plugin um Standard Gradle-Tasks aus dem Kontext-Menu aufzurufen
+   </description>
+
+   <copyright>
+      Team DevEx @ VISUS Health IT GmbH wünscht viel Spaß beim benutzen!
+   </copyright>
+
+   <url>
+      <update label="VISUS Plug-In&apos;s" url="file:/O:/java/dev_ide/eclipse/UpdateSite/site.xml"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.core" version="3.9.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" version="3.8.101" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="com.visus.eclipse.plugin"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
