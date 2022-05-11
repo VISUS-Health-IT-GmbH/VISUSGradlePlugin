@@ -1,8 +1,7 @@
-package com.visus.eclipse.plugin;
+package com.visus.eclipse.plugin.action;
 
 import java.io.File;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
@@ -19,13 +18,18 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+import com.visus.eclipse.plugin.Activator;
 import com.visus.eclipse.plugin.gradle.GradleExecutor;
 
 
-public class GenerateJarAction extends AbstractHandler {
-	/** Execute the action running Gradle "jar" task */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+/**
+ * 	For every Plugin action this contains the general methods used
+ * 	
+ * 	@author hahnen
+ */
+public class DefaultAction {
+	/** Execute any Gradle task */
+	public static Object execute(ExecutionEvent event, String taskName) throws ExecutionException {
 		final Bundle bundle			= FrameworkUtil.getBundle(Activator.getDefault().getClass());
         final ILog logger 			= Platform.getLog(bundle);
         final ISelection selection	= HandlerUtil.getCurrentSelection(event);
@@ -57,17 +61,17 @@ public class GenerateJarAction extends AbstractHandler {
                 
                 // 3) Run actual Gradle task
                 final IProject project 	= currentProject;
-                final Job job 			= new Job("Executing Gradle 'jar' task") {
+                final Job job 			= new Job("Executing Gradle '" + taskName + "' task") {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						final boolean done = GradleExecutor.runGradleTask(project, monitor, logger, "jar");
+						final boolean done = GradleExecutor.runGradleTask(project, monitor, logger, taskName);
 						if (done) {
 							return Status.OK_STATUS;
 						}
 						
 						logger.log(new Status(
 							Status.ERROR, Activator.PLUGIN_ID,
-							"Gradle 'jar' task could not be executed on project: " + project.getName()
+							"Gradle '" + taskName + "' task could not be executed on project: " + project.getName()
 						));
 						
 						return Status.CANCEL_STATUS;

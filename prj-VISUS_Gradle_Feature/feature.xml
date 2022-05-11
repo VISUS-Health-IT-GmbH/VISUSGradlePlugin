@@ -15,7 +15,7 @@
    </copyright>
 
    <url>
-      <update label="VISUS Plug-In&apos;s" url="file:/O:/java/dev_ide/eclipse/UpdateSite/site.xml"/>
+      <update label="Gradle Integration Update Site" url="file:/O:/java/dev_ide/eclipse/VISUSGradlePlugin/prj-VISUS_Gradle_UpdateSite/site.xml"/>
    </url>
 
    <requires>
@@ -27,9 +27,9 @@
 
    <plugin
          id="com.visus.eclipse.plugin"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
+         download-size="16"
+         install-size="16"
+         version="1.0.0"
          unpack="false"/>
 
 </feature>
