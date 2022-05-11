@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
@@ -54,6 +56,10 @@ public class GradleExecutor {
 				cmd = new String[] {
 					"cmd", "/c", "gradlew.bat " + task
 				};
+				
+				logger.log(new Status(
+					Status.INFO, Activator.PLUGIN_ID, project.getName() + " is the root project!"
+				));
 			} else if (!System.getProperty("os.name").toLowerCase().contains("win")
 						&& project.getLocation().toFile().getAbsolutePath() != gradleRootProject.getAbsolutePath())	{
 				cmd = new String[] {
@@ -64,6 +70,10 @@ public class GradleExecutor {
 				cmd = new String[] {
 					"sh", "-c", "gradlew :" + task
 				};
+				
+				logger.log(new Status(
+					Status.INFO, Activator.PLUGIN_ID, project.getName() + " is the root project!"
+				));
 			}
 			
 			logger.log(new Status(
@@ -77,30 +87,36 @@ public class GradleExecutor {
 									 .redirectError(ProcessBuilder.Redirect.PIPE)
 									 .start();
 			
-			boolean finished = process.waitFor(5, TimeUnit.MINUTES);
+			long timeout = calculateTimeout(project, gradleRootProject);
+			boolean finished = process.waitFor(timeout, TimeUnit.SECONDS);
 			String output = new BufferedReader(new InputStreamReader(process.getInputStream()))
 								.lines()
 								.collect(Collectors.joining("\n"));
 			
-			if (!finished) {
+			// 4) Refresh Eclipse "Project Explorer" / "Package Explorer"
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			
+			// 5) Check for result or timeout
+			if (!finished && output.contains("BUILD SUCCESSFUL in")) {
+				logger.log(new Status(
+					Status.WARNING, Activator.PLUGIN_ID,
+					"Gradle task finished with timout but was successful!\nSee output:\n" + output
+				));
+			} else if (!finished) {
 				logger.log(new Status(
 					Status.ERROR, Activator.PLUGIN_ID,
-					"Gradle task ran into a timeout of 5 Minutes!\nSee output:\n" + output
+					"Gradle task failed with timeout of " + timeout + " Seconds!\nSee output:\n" + output
 				));
 				
 				return false;
+			} else {
+				logger.log(new Status(
+					Status.INFO, Activator.PLUGIN_ID,
+					"Gradle task finished with exit code: " + process.exitValue() + "!\nSee output:\n" + output
+				));
 			}
 			
-			int exitCode = process.exitValue();
-			logger.log(new Status(
-				Status.INFO, Activator.PLUGIN_ID,
-				"Gradle task finished with exit code: " + exitCode + "!\nSee output:\n" + output
-			));
-			
-			// 4) Refresh Eclipse "Project Explorer" / "Navigator"
-			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-			
-			return exitCode == 0;
+			return true;
 		} catch (IOException | InterruptedException | CoreException err) {
 			logger.log(new Status(Status.ERROR, Activator.PLUGIN_ID, err.getMessage(), err));
 			
@@ -126,5 +142,57 @@ public class GradleExecutor {
 		}
 		
 		return tmpDir;
+	}
+	
+	
+	/**
+	 * 	Issue: Some task executions end in a timeout - even though the Gradle task was successful
+	 * 	-> calculated timeout better than standard 5 minutes ...
+	 * 	
+	 * 	@param project the project invoking an action with a Gradle task
+	 * 	@param gradleRootProject the Gradle root project found earlier
+	 * 	@return timeout in seconds based on Gradle project structure
+	 * 	@throws IOException when reading file(s) fails in any way
+	 */
+	private static long calculateTimeout(final IProject project, File gradleRootProject) throws IOException {
+		if (project.getLocation().toFile().getAbsolutePath() == gradleRootProject.getAbsolutePath()) {
+			// 1) Root project takes even longer (check for sub projects)
+			File settings = null;
+			if (new File(gradleRootProject, "settings.gradle").exists()) {
+				settings = new File(gradleRootProject, "settings.gradle");
+			} else if (new File(gradleRootProject, "settings.gradle.kts").exists()) {
+				settings = new File(gradleRootProject, "settings.gradle.kts");
+			} else {
+				// I have no idea what happened - just assume 60 seconds!
+				return 60;
+			}
+			
+			// For every subproject found add 10 seconds (but at least 30 seconds)!
+			String output = Files.readString(settings.toPath());
+			int numberOfSubprojects = (output.split(Pattern.quote("include \":")).length -1)
+									+ (output.split(Pattern.quote("include(\":")).length -1)
+									+ (output.split(Pattern.quote("include \':")).length -1)
+									+ (output.split(Pattern.quote("include(\':")).length -1);
+			return Math.max(numberOfSubprojects, 3) * 10;
+		}
+		
+		// 2) Sub project (check for project dependencies)
+		File build = null;
+		if (new File(project.getLocation().toFile(), "build.gradle").exists()) {
+			build = new File(project.getLocation().toFile(), "build.gradle");
+		} else if (new File(project.getLocation().toFile(), "build.gradle.kts").exists()) {
+			build = new File(project.getLocation().toFile(), "build.gradle.kts");
+		} else {
+			// I have no idea what happened - just assume 60 seconds!
+			return 60;
+		}
+		
+		// For every project dependency found add 10 seconds (but at least 30 seconds)!
+		String output = Files.readString(build.toPath());
+		int numberOfProjectDependencies = (output.split(Pattern.quote("project \":")).length -1)
+										+ (output.split(Pattern.quote("project(\":")).length -1)
+										+ (output.split(Pattern.quote("project \':")).length -1)
+										+ (output.split(Pattern.quote("project(\':")).length -1);
+		return Math.max(numberOfProjectDependencies, 3) * 10;
 	}
 }

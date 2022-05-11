@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Gradle Integration Plugin
 Bundle-SymbolicName: com.visus.eclipse.plugin;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 Bundle-Vendor: VISUS Health IT GmbH
 Automatic-Module-Name: com.visus.eclipse.gradle
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
