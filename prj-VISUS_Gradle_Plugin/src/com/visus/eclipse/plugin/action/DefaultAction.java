@@ -53,19 +53,28 @@ public class DefaultAction {
                 	logger.log(new Status(
 						Status.INFO, Activator.PLUGIN_ID,
 						"This project '" + currentProject.getName()
-						+ "' is no Gradle project - no build.gradle / build.gradle.kts found!"
+						+ "' is no Gradle project - no build.gradle / build.gradle.kts was found!"
 					));
                 	
                 	return null;
                 }
                 
+                logger.log(new Status(
+            		Status.INFO, Activator.PLUGIN_ID,
+            		"This project '" + currentProject.getName()
+            		+ "' is a Gradle project - a build.gradle / build.gradle.kts was found!"
+                ));
+                
                 // 3) Run actual Gradle task
-                final IProject project 	= currentProject;
-                final Job job 			= new Job("Executing Gradle '" + taskName + "' task") {
+                final IProject project = currentProject;
+                final Job job = new Job("Executing Gradle '" + taskName + "' task on project: " + project.getName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						final boolean done = GradleExecutor.runGradleTask(project, monitor, logger, taskName);
-						if (done) {
+						if (GradleExecutor.runGradleTask(project, monitor, logger, taskName)) {
+							logger.log(new Status(
+								Status.INFO, Activator.PLUGIN_ID,
+								"Gradle '" + taskName + "' task executed successfully on project: " + project.getName()
+							));
 							return Status.OK_STATUS;
 						}
 						
@@ -73,7 +82,6 @@ public class DefaultAction {
 							Status.ERROR, Activator.PLUGIN_ID,
 							"Gradle '" + taskName + "' task could not be executed on project: " + project.getName()
 						));
-						
 						return Status.CANCEL_STATUS;
 					}
                 };
