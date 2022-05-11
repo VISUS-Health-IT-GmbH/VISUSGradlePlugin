@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.IProject;
@@ -52,12 +53,12 @@ public class GradleExecutor {
 				};
 			}
 			
-			logger.log(new Status(Status.INFO, Activator.PLUGIN_ID, "Gradle OS specific command is: " + cmd));
+			logger.log(new Status(
+				Status.INFO, Activator.PLUGIN_ID, "Gradle OS specific command is: " + Arrays.toString(cmd)
+			));
 			
 			// 3) Run command and catch input / error streams and exit code
 			Process process = builder.command(cmd).directory(gradleRootProject).start();
-			BufferedReader is = inputStream(process);
-			BufferedReader es = errorStream(process);
 			
 			int exitCode = -1;
 			if (!process.waitFor(5, TimeUnit.MINUTES)) {
@@ -70,11 +71,6 @@ public class GradleExecutor {
 					Status.INFO, Activator.PLUGIN_ID, "Gradle task finished with exit code: " + exitCode
 				));
 			}
-			
-			
-			// 4) Log possible output for easier debugging
-			logger.log(new Status(Status.INFO, Activator.PLUGIN_ID, "Output stream: " + resolveBufferedReader(is)));
-			logger.log(new Status(Status.INFO, Activator.PLUGIN_ID, "Error stream: " + resolveBufferedReader(es)));
 			
 			// 5) Refresh Eclipse "Project Explorer" / "Navigator"
 			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
@@ -105,47 +101,5 @@ public class GradleExecutor {
 		}
 		
 		return tmpDir;
-	}
-	
-	
-	/**
-	 * 	Retrieves the input stream of a process
-	 * 	
-	 * 	@param process to get input stream from
-	 * 	@return input stream
-	 */
-	private static BufferedReader inputStream(Process process) {
-		return new BufferedReader(new InputStreamReader(process.getInputStream()));
-	}
-	
-	
-	/**
-	 * 	Retrieves the error stream of a process
-	 * 	
-	 * 	@param process to get error stream from
-	 * 	@return error stream
-	 */
-	private static BufferedReader errorStream(Process process) {
-		return new BufferedReader(new InputStreamReader(process.getErrorStream()));
-	}
-	
-	
-	/**
-	 * 	Converts the content of a buffered reader to a string
-	 * 
-	 * 	@param stream the buffered reader to be evaluated
-	 * 	@return content of stream provided
-	 * 	@throws IOException when working with stream fails
-	 */
-	private static String resolveBufferedReader(BufferedReader stream) throws IOException {
-		StringBuilder builder = new StringBuilder();
-		String text = null;
-		
-		while ((text = stream.readLine()) != null) {
-			builder.append(text);
-			builder.append(System.getProperty("line.separator"));
-		}
-		
-		return builder.toString();
 	}
 }
