@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -45,9 +46,9 @@ public class GradleExecutor {
 		try {
 			// 2) Create Gradle command based on OS in use
 			ProcessBuilder builder = new ProcessBuilder();
-			String[] cmd = new String[] { "gradlew.bat", ":" + project.getName() + ":" + task };
+			String[] cmd = new String[] { "cmd", "/c", "gradlew.bat :" + project.getName() + ":" + task };
 			if (!System.getProperty("os.name").toLowerCase().contains("win")) {
-				cmd = new String[] { "gradlew", ":" + project.getName() + ":" + task };
+				cmd = new String[] { "sh", "-c", "gradlew :" + project.getName() + ":" + task };
 			}
 			
 			logger.log(new Status(
@@ -85,7 +86,7 @@ public class GradleExecutor {
 			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 			
 			return exitCode == 0;
-		} catch (Exception err) {
+		} catch (IOException | InterruptedException | CoreException err) {
 			logger.log(new Status(Status.ERROR, Activator.PLUGIN_ID, err.getMessage(), err));
 			
 			return false;
