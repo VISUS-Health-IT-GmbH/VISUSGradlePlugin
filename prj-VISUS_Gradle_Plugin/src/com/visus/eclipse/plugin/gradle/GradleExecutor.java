@@ -44,11 +44,26 @@ public class GradleExecutor {
 		));
 		
 		try {
-			// 2) Create Gradle command based on OS in use
+			// 2) Create Gradle command based on OS in use (and if sub or root project)
 			ProcessBuilder builder = new ProcessBuilder();
-			String[] cmd = new String[] { "cmd", "/c", "gradlew.bat :" + project.getName() + ":" + task };
-			if (!System.getProperty("os.name").toLowerCase().contains("win")) {
-				cmd = new String[] { "sh", "-c", "gradlew :" + project.getName() + ":" + task };
+			String[] cmd = new String[] {
+				"cmd", "/c", "gradlew.bat :" + project.getName() + ":" + task
+			};
+			if (System.getProperty("os.name").toLowerCase().contains("win")
+				&& project.getLocation().toFile().getAbsolutePath() == gradleRootProject.getAbsolutePath()) {
+				cmd = new String[] {
+					"cmd", "/c", "gradlew.bat " + task
+				};
+			} else if (!System.getProperty("os.name").toLowerCase().contains("win")
+						&& project.getLocation().toFile().getAbsolutePath() != gradleRootProject.getAbsolutePath())	{
+				cmd = new String[] {
+					"sh", "-c", "gradlew :" + project.getName() + ":" + task
+				};
+			} else if (!System.getProperty("os.name").toLowerCase().contains("win")
+						&& project.getLocation().toFile().getAbsolutePath() == gradleRootProject.getAbsolutePath()) {
+				cmd = new String[] {
+					"sh", "-c", "gradlew :" + task
+				};
 			}
 			
 			logger.log(new Status(
