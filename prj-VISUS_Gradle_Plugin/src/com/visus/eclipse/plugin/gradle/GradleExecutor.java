@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -44,13 +45,9 @@ public class GradleExecutor {
 		try {
 			// 2) Create Gradle command based on OS in use
 			ProcessBuilder builder = new ProcessBuilder();
-			String[] cmd = new String[] {
-				"cmd.exe", "/c", "gradlew.bat", ":" + project.getName() + ":jar"
-			};
+			String[] cmd = new String[] { "gradlew.bat", ":" + project.getName() + ":" + task };
 			if (!System.getProperty("os.name").toLowerCase().contains("win")) {
-				cmd = new String[] {
-					"sh", "-c", "gradlew", ":" + project.getName() + ":jar"
-				};
+				cmd = new String[] { "gradlew", ":" + project.getName() + ":" + task };
 			}
 			
 			logger.log(new Status(
@@ -58,21 +55,33 @@ public class GradleExecutor {
 			));
 			
 			// 3) Run command and catch input / error streams and exit code
-			Process process = builder.command(cmd).directory(gradleRootProject).start();
+			Process process = builder.command(cmd)
+									 .directory(gradleRootProject)
+									 .redirectOutput(ProcessBuilder.Redirect.PIPE)
+									 .redirectError(ProcessBuilder.Redirect.PIPE)
+									 .start();
 			
-			int exitCode = -1;
-			if (!process.waitFor(5, TimeUnit.MINUTES)) {
+			boolean finished = process.waitFor(5, TimeUnit.MINUTES);
+			String output = new BufferedReader(new InputStreamReader(process.getInputStream()))
+								.lines()
+								.collect(Collectors.joining("\n"));
+			
+			if (!finished) {
 				logger.log(new Status(
-					Status.ERROR, Activator.PLUGIN_ID, "Gradle task ran into a timeout of 5 Minutes!"
+					Status.ERROR, Activator.PLUGIN_ID,
+					"Gradle task ran into a timeout of 5 Minutes!\nSee output:\n" + output
 				));
-			} else {
-				exitCode = process.exitValue();
-				logger.log(new Status(
-					Status.INFO, Activator.PLUGIN_ID, "Gradle task finished with exit code: " + exitCode
-				));
+				
+				return false;
 			}
 			
-			// 5) Refresh Eclipse "Project Explorer" / "Navigator"
+			int exitCode = process.exitValue();
+			logger.log(new Status(
+				Status.INFO, Activator.PLUGIN_ID,
+				"Gradle task finished with exit code: " + exitCode + "!\nSee output:\n" + output
+			));
+			
+			// 4) Refresh Eclipse "Project Explorer" / "Navigator"
 			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 			
 			return exitCode == 0;
