@@ -16,7 +16,7 @@
             </with>
          </activeWhen>
       </handler>
-	  <handler class="com.visus.eclipse.plugin.action.GenerateWarAction"
+      <handler class="com.visus.eclipse.plugin.action.GenerateWarAction"
                commandId="com.visus.menu.action.GenerateWarAction">
          <activeWhen>
             <with variable="selection">
@@ -30,7 +30,7 @@
             </with>
          </activeWhen>
       </handler>
-	  <handler class="com.visus.eclipse.plugin.action.FixWarLibAction"
+      <handler class="com.visus.eclipse.plugin.action.FixWarLibAction"
                commandId="com.visus.menu.action.FixWarLibAction">
          <activeWhen>
             <with variable="selection">
@@ -44,8 +44,36 @@
             </with>
          </activeWhen>
       </handler>
-	  <handler class="com.visus.eclipse.plugin.action.DelWarLibAction"
+      <handler class="com.visus.eclipse.plugin.action.DelWarLibAction"
                commandId="com.visus.menu.action.DelWarLibAction">
+         <activeWhen>
+            <with variable="selection">
+               <count value="1" />
+               <iterate ifEmpty="false" operator="and">
+                  <or>
+                     <adapt type="org.eclipse.core.resources.IProject" />
+                     <adapt type="org.eclipse.jdt.core.IJavaProject" />
+                  </or>
+               </iterate>
+            </with>
+         </activeWhen>
+      </handler>
+      <handler class="com.visus.eclipse.plugin.action.GenerateEclipseAction"
+               commandId="com.visus.menu.action.GenerateEclipseAction">
+         <activeWhen>
+            <with variable="selection">
+               <count value="1" />
+               <iterate ifEmpty="false" operator="and">
+                  <or>
+                     <adapt type="org.eclipse.core.resources.IProject" />
+                     <adapt type="org.eclipse.jdt.core.IJavaProject" />
+                  </or>
+               </iterate>
+            </with>
+         </activeWhen>
+      </handler>
+      <handler class="com.visus.eclipse.plugin.action.FixEclipseAction"
+               commandId="com.visus.menu.action.FixEclipseAction">
          <activeWhen>
             <with variable="selection">
                <count value="1" />
@@ -73,17 +101,23 @@
                label="VISUS Gradle"
                mnemonic="V">
             <command commandId="com.visus.menu.action.GenerateJarAction"
-					 label="Generate JAR using Gradle"
-					 style="push" />
-			<command commandId="com.visus.menu.action.GenerateWarAction"
-					 label="Generate WAR using Gradle"
-					 style="push" />
-			<command commandId="com.visus.menu.action.FixWarLibAction"
-					 label="Fix WEB-INF/lib folder for Eclipse Tomcat"
-					 style="push" />
-			<command commandId="com.visus.menu.action.DelWarLibAction"
-					 label="Fix WEB-INF/lib folder for generating WAR using Gradle"
-					 style="push" />
+                label="Generate JAR using Gradle"
+                style="push" />
+         <command commandId="com.visus.menu.action.GenerateWarAction"
+                label="Generate WAR using Gradle"
+                style="push" />
+         <command commandId="com.visus.menu.action.FixWarLibAction"
+                label="Fix WEB-INF/lib folder for Eclipse Tomcat"
+                style="push" />
+         <command commandId="com.visus.menu.action.DelWarLibAction"
+                label="Fix WEB-INF/lib folder for generating WAR using Gradle"
+                style="push" />
+         <command commandId="com.visus.menu.action.GenerateEclipseAction"
+                label="Generate Eclipse files again"
+                style="push" />
+         <command commandId="com.visus.menu.action.FixEclipseAction"
+                label="Fix corrupt Eclipse files"
+                style="push" />
          </menu>
       </menuContribution>
    </extension>
@@ -94,17 +128,25 @@
                id="com.visus.menu.action.GenerateJarAction"
                name="Generate JAR using Gradle">
       </command>
-	  <command categoryId="com.visus.gradle.commands.visus"
+      <command categoryId="com.visus.gradle.commands.visus"
                id="com.visus.menu.action.GenerateWarAction"
                name="Generate WAR using Gradle">
       </command>
-	  <command categoryId="com.visus.gradle.commands.visus"
+      <command categoryId="com.visus.gradle.commands.visus"
                id="com.visus.menu.action.FixWarLibAction"
                name="Fix WEB-INF/lib folder for Eclipse Tomcat">
       </command>
-	  <command categoryId="com.visus.gradle.commands.visus"
+      <command categoryId="com.visus.gradle.commands.visus"
                id="com.visus.menu.action.DelWarLibAction"
                name="Fix WEB-INF/lib folder for generating WAR using Gradle">
+      </command>
+      <command categoryId="com.visus.gradle.commands.visus"
+               id="com.visus.menu.action.GenerateEclipseAction"
+               name="Generate Eclipse files again">
+      </command>
+      <command categoryId="com.visus.gradle.commands.visus"
+               id="com.visus.menu.action.FixEclipseAction"
+               name="Fix corrupt Eclipse files">
       </command>
    </extension>
 </plugin>
