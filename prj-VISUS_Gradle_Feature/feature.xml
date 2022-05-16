@@ -2,7 +2,7 @@
 <feature
       id="com.visus.eclipse.feature"
       label="Gradle Integration Plugin"
-      version="1.0.1"
+      version="1.0.2"
       provider-name="VISUS Health IT GmbH"
       plugin="com.visus.eclipse.plugin">
 
@@ -27,9 +27,9 @@
 
    <plugin
          id="com.visus.eclipse.plugin"
-         download-size="16"
-         install-size="16"
-         version="1.0.1"
+         download-size="17"
+         install-size="17"
+         version="1.0.2"
          unpack="false"/>
 
 </feature>

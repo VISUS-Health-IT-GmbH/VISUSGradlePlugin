@@ -1,3 +1,15 @@
+/*  GradleExecutor.java
+ *
+ *  Copyright (C) 2022, VISUS Health IT GmbH
+ *  This software and supporting documentation were developed by
+ *    VISUS Health IT GmbH
+ *    Gesundheitscampus-Sued 15-17
+ *    D-44801 Bochum, Germany
+ *    http://www.visus.com
+ *    mailto:info@visus.com
+ *
+ *  -> see LICENCE at root of repository
+ */
 package com.visus.eclipse.plugin.gradle;
 
 import java.io.BufferedReader;
@@ -28,7 +40,7 @@ import com.visus.eclipse.plugin.Activator;
 public class GradleExecutor {
 	/** Run a specific Gradle task */
 	public static boolean runGradleTask(final IProject project, final IProgressMonitor monitor, final ILog logger,
-										final String task) {
+										final String task, boolean refreshIDE) {
 		// 1) Try to retrieve the Gradle root project folder (always containing a "gradlew.bat" / "gradlew" file)
 		File gradleRootProject = getGradleRootDir(project.getLocation().toFile());
 		if (gradleRootProject == null) {
@@ -52,7 +64,7 @@ public class GradleExecutor {
 				"cmd", "/c", "gradlew.bat :" + project.getName() + ":" + task
 			};
 			if (System.getProperty("os.name").toLowerCase().contains("win")
-				&& project.getLocation().toFile().getAbsolutePath() == gradleRootProject.getAbsolutePath()) {
+				&& project.getLocation().toFile().toPath().equals(gradleRootProject.toPath())) {
 				cmd = new String[] {
 					"cmd", "/c", "gradlew.bat " + task
 				};
@@ -61,12 +73,12 @@ public class GradleExecutor {
 					Status.INFO, Activator.PLUGIN_ID, project.getName() + " is the root project!"
 				));
 			} else if (!System.getProperty("os.name").toLowerCase().contains("win")
-						&& project.getLocation().toFile().getAbsolutePath() != gradleRootProject.getAbsolutePath())	{
+						&& !project.getLocation().toFile().toPath().equals(gradleRootProject.toPath()))	{
 				cmd = new String[] {
 					"sh", "-c", "gradlew :" + project.getName() + ":" + task
 				};
 			} else if (!System.getProperty("os.name").toLowerCase().contains("win")
-						&& project.getLocation().toFile().getAbsolutePath() == gradleRootProject.getAbsolutePath()) {
+						&& project.getLocation().toFile().toPath().equals(gradleRootProject.toPath())) {
 				cmd = new String[] {
 					"sh", "-c", "gradlew :" + task
 				};
@@ -94,7 +106,9 @@ public class GradleExecutor {
 								.collect(Collectors.joining("\n"));
 			
 			// 4) Refresh Eclipse "Project Explorer" / "Package Explorer"
-			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			if (refreshIDE) {
+				project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			}
 			
 			// 5) Check for result or timeout
 			if (!finished && output.contains("BUILD SUCCESSFUL in")) {
@@ -155,7 +169,7 @@ public class GradleExecutor {
 	 * 	@throws IOException when reading file(s) fails in any way
 	 */
 	private static long calculateTimeout(final IProject project, File gradleRootProject) throws IOException {
-		if (project.getLocation().toFile().getAbsolutePath() == gradleRootProject.getAbsolutePath()) {
+		if (project.getLocation().toFile().toPath().equals(gradleRootProject.toPath())) {
 			// 1) Root project takes even longer (check for sub projects)
 			File settings = null;
 			if (new File(gradleRootProject, "settings.gradle").exists()) {

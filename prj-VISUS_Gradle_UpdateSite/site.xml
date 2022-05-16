@@ -3,7 +3,7 @@
    <description name="Gradle Integration" url="file:/O:/java/dev_ide/eclipse/VISUSGradlePlugin/prj-VISUS_Gradle_UpdateSite/site.xml">
       Gradle Integration Plugin
    </description>
-   <feature url="features/com.visus.eclipse.feature_1.0.1.jar" id="com.visus.eclipse.feature" version="1.0.1">
+   <feature url="features/com.visus.eclipse.feature_1.0.2.jar" id="com.visus.eclipse.feature" version="1.0.2">
       <category name="com.visus.eclipse.plugin"/>
    </feature>
    <category-def name="com.visus.eclipse.plugin" label="VISUS Eclipse Gradle Plugin">

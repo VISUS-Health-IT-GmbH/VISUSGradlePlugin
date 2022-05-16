@@ -1,4 +1,4 @@
-/*  DelWarLibAction.java
+/*  CleanAction.java
  *
  *  Copyright (C) 2022, VISUS Health IT GmbH
  *  This software and supporting documentation were developed by
@@ -18,17 +18,16 @@ import org.eclipse.core.commands.ExecutionException;
 
 
 /**
- * 	Action to execute the Gradle "del_WEB-INF_lib" task
- * 	-> not a standard but deletes the WEB-INF/lib folder created using Gradle "fix_WEB-INF_lib" task
+ * 	Action to execute the Gradle "clean" task
  * 
  * 	@author hahnen
  */
-public class DelWarLibAction extends AbstractHandler {
+public class CleanAction extends AbstractHandler {
 	/** Overwrite default method */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		DefaultAction.execute(event, "del_WEB-INF_lib", true);
+		DefaultAction.execute(event, "clean", true);
 		
-		return null;
+		return true;
 	}
 }

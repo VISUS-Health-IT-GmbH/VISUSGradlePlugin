@@ -1,3 +1,15 @@
+/*  DefaultAction.java
+ *
+ *  Copyright (C) 2022, VISUS Health IT GmbH
+ *  This software and supporting documentation were developed by
+ *    VISUS Health IT GmbH
+ *    Gesundheitscampus-Sued 15-17
+ *    D-44801 Bochum, Germany
+ *    http://www.visus.com
+ *    mailto:info@visus.com
+ *
+ *  -> see LICENCE at root of repository
+ */
 package com.visus.eclipse.plugin.action;
 
 import java.io.File;
@@ -29,7 +41,7 @@ import com.visus.eclipse.plugin.gradle.GradleExecutor;
  */
 public class DefaultAction {
 	/** Execute any Gradle task */
-	public static Object execute(ExecutionEvent event, String taskName) throws ExecutionException {
+	public static void execute(ExecutionEvent event, String taskName, boolean refreshIDE) throws ExecutionException {
 		final Bundle bundle			= FrameworkUtil.getBundle(Activator.getDefault().getClass());
         final ILog logger 			= Platform.getLog(bundle);
         final ISelection selection	= HandlerUtil.getCurrentSelection(event);
@@ -56,7 +68,7 @@ public class DefaultAction {
 						+ "' is no Gradle project - no build.gradle / build.gradle.kts was found!"
 					));
                 	
-                	return null;
+                	return;
                 }
                 
                 logger.log(new Status(
@@ -67,10 +79,10 @@ public class DefaultAction {
                 
                 // 3) Run actual Gradle task
                 final IProject project = currentProject;
-                final Job job = new Job("Executing Gradle '" + taskName + "' task on project: " + project.getName()) {
+                final Job job = new Job("Gradle '" + taskName + "' task on project: " + project.getName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						if (GradleExecutor.runGradleTask(project, monitor, logger, taskName)) {
+						if (GradleExecutor.runGradleTask(project, monitor, logger, taskName, refreshIDE)) {
 							logger.log(new Status(
 								Status.INFO, Activator.PLUGIN_ID,
 								"Gradle '" + taskName + "' task executed successfully on project: " + project.getName()
@@ -92,6 +104,6 @@ public class DefaultAction {
             }
         }
 		
-		return null;
+		return;
 	}
 }
