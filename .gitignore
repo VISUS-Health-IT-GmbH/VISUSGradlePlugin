@@ -1,0 +1,6 @@
+# Eclipse files & folders
+/.metadata/
+
+# macOS files
+**/.DS_Store
+
